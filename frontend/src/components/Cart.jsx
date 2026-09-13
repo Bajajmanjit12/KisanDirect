@@ -1,12 +1,34 @@
 import { useState } from "react";
 import { api } from "../api/client";
 
-export default function Cart({ items, onClose, onUpdateQty, onRemove, onCheckoutComplete, onToast }) {
+export default function Cart({
+  items,
+  onClose,
+  onUpdateQty,
+  onRemove,
+  onCheckoutComplete,
+  onToast,
+  isLoggedIn,
+  user,
+}) {
   const [placing, setPlacing] = useState(false);
 
   const grandTotal = items.reduce((sum, item) => sum + item.quantityKg * item.crop.kisanPricePerKg, 0);
 
   const handleCheckout = async () => {
+    if (!isLoggedIn) {
+      onToast("Please login before placing an order");
+      return;
+    }
+
+    if (user?.role !== "buyer") {
+      onToast("Only Buyers can place orders");
+      return;
+    }
+
+    if (items.length === 0) return;
+
+    setPlacing(true);
     if (items.length === 0) return;
     setPlacing(true);
     try {
