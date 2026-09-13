@@ -1,4 +1,4 @@
-const BASE =  import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const BASE = import.meta.env.VITE_API_URL || "https://kisandirect-backend.onrender.com/api";
 
 async function handle(res) {
   if (!res.ok) {
