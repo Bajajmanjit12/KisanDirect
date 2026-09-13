@@ -1,0 +1,25 @@
+{
+  "fpoName": "Sahyadri Farmers Co-op",
+  "stats": {
+    "directPayoutsRealized": {
+      "value": 482500,
+      "display": "\u20b94,82,500",
+      "delta": "100% Escrow Settled via T+1"
+    },
+    "activeBatchesListed": {
+      "value": 12,
+      "display": "12 Lots",
+      "delta": "Grade A QC Certified"
+    },
+    "logisticsPickupsScheduled": {
+      "value": 3,
+      "display": "3 Trucks",
+      "delta": "Reefer pickup at 08:10 AM"
+    },
+    "averageRealizationPremium": {
+      "value": 41.2,
+      "display": "+41.2%",
+      "delta": "Above local APMC Mandi rate"
+    }
+  }
+}

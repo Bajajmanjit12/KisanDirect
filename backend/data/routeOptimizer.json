@@ -1,0 +1,50 @@
+{
+  "data": {
+    "vehicle": {
+      "id": "KD-TRUCK-001",
+      "name": "KisanDirect Delivery Truck",
+      "driver": "Ramesh Patil",
+      "status": "In Transit"
+    },
+    "metrics": {
+      "totalDistance": 128,
+      "estimatedTime": 245,
+      "fuelSaved": 18,
+      "co2Reduction": 24
+    },
+    "waypoints": [
+      {
+        "id": "WP-01",
+        "name": "Nashik Collection Center",
+        "type": "Collection Point",
+        "quantity": 450,
+        "eta": "09:00 AM",
+        "latitude": 20.0059,
+        "longitude": 73.7897
+      },
+      {
+        "id": "WP-02",
+        "name": "Pune Wholesale Market",
+        "type": "Delivery Point",
+        "quantity": 250,
+        "eta": "11:30 AM",
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      {
+        "id": "WP-03",
+        "name": "Mumbai Retail Hub",
+        "type": "Delivery Point",
+        "quantity": 200,
+        "eta": "02:15 PM",
+        "latitude": 19.076,
+        "longitude": 72.8777
+      }
+    ],
+    "telemetry": {
+      "speed": 48,
+      "engineStatus": "Running"
+    },
+    "priority": "High"
+  }
+}

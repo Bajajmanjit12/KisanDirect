@@ -1,0 +1,31 @@
+{
+  "headline": {
+    "farmerShareOfRupee": { "value": 72, "unit": "%", "baseline": "28% APMC", "delta": "+44% higher farm realization", "direction": "up" },
+    "consumerPriceReduction": { "value": -23.8, "unit": "%", "delta": "Savings passed to consumers", "direction": "down" },
+    "logisticsTransitWaste": { "value": 3.2, "unit": "%", "baseline": "22% Mandi", "delta": "Reefer Cold-Chain protected", "direction": "down" },
+    "intermediariesBypassed": { "value": 5, "unit": "Layers", "delta": "Zero Arhtiya commissions", "direction": "flat" }
+  },
+  "comparison": {
+    "traditional": {
+      "label": "Traditional Mandi Chain (5+ Intermediaries)",
+      "farmerGetsPer100": 28,
+      "segments": [
+        { "label": "Farmer Net Return", "amount": 28.0, "color": "#22c55e" },
+        { "label": "Village Aggregator Margin", "amount": 12.0, "color": "#f59e0b" },
+        { "label": "Arhtiya (Commission Agent) Fee", "amount": 14.0, "color": "#ec4899" },
+        { "label": "Wholesalers & Sub-wholesalers", "amount": 16.0, "color": "#8b5cf6" },
+        { "label": "Local Retail Markup & Transport Spoilage", "amount": 30.0, "color": "#f97316" }
+      ]
+    },
+    "kisandirect": {
+      "label": "KisanDirect AI (Direct Disintermediation)",
+      "farmerGetsPer100": 72,
+      "segments": [
+        { "label": "Farmer Realization", "amount": 72.0, "pct": 72, "color": "#22c55e", "delta": "+157% Increase" },
+        { "label": "FPO Sorting, QC & Aggregation", "amount": 6.0, "pct": 6, "color": "#f59e0b" },
+        { "label": "AI-Optimized Reefer Freight", "amount": 8.0, "pct": 8, "color": "#3b82f6" },
+        { "label": "Consumer Direct Cash Savings", "amount": 14.0, "pct": 14, "color": "#eab308", "note": "Lower Price" }
+      ]
+    }
+  }
+}

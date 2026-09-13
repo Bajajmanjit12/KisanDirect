@@ -1,0 +1,47 @@
+[
+  {
+    "id": "LOT-901",
+    "cropName": "Nashik Red Onion",
+    "cropId": "onion-nashik-garwa",
+    "origin": "Lasalgaon Farmgate",
+    "quantity": 450,
+    "unit": "Quintals",
+    "qualityGrade": "Grade A (QC 98%)",
+    "gradeTone": "green",
+    "directRatePerKg": 24.5,
+    "mandiRatePerKg": 16,
+    "scheduledPickup": "Today, 08:10 AM (Reefer MH-15)",
+    "status": "Loading",
+    "statusTone": "orange"
+  },
+  {
+    "id": "LOT-884",
+    "cropName": "Kolar Hybrid Tomatoes",
+    "cropId": "tomato-kolar-hybrid",
+    "origin": "Srinivaspur Orchard",
+    "quantity": 320,
+    "unit": "Crates",
+    "qualityGrade": "GlobalGAP",
+    "gradeTone": "green",
+    "directRatePerKg": 22,
+    "mandiRatePerKg": 12.5,
+    "scheduledPickup": "Tomorrow, 06:00 AM",
+    "status": "Scheduled",
+    "statusTone": "blue"
+  },
+  {
+    "id": "LOT-871",
+    "cropName": "Agra Chipsona Potato",
+    "cropId": "potato-agra-chipsona",
+    "origin": "Fatehabad Hub",
+    "quantity": 800,
+    "unit": "Quintals",
+    "qualityGrade": "Grade A Industrial",
+    "gradeTone": "blue",
+    "directRatePerKg": 18,
+    "mandiRatePerKg": 11,
+    "scheduledPickup": "Completed (Delivered)",
+    "status": "Paid \u20b914.4 Lakh",
+    "statusTone": "green"
+  }
+]
