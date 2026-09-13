@@ -1,4 +1,6 @@
+
 import { useEffect, useMemo, useState } from "react";
+import { api } from "../api/client";
 import "./KisanVani.css";
 
 const hindiCropNames = {
@@ -11,7 +13,7 @@ const hindiCropNames = {
 };
 
 function getSimpleCropName(name = "") {
-  const lower = name.toLowerCase();
+  const lower = String(name).toLowerCase();
 
   if (lower.includes("onion")) return "onion";
   if (lower.includes("tomato")) return "tomato";
@@ -20,17 +22,21 @@ function getSimpleCropName(name = "") {
   if (lower.includes("apple")) return "apple";
   if (lower.includes("toor dal")) return "toor dal";
 
-  return name;
+  return lower;
 }
 
-function getHindiCropName(name) {
+function getHindiCropName(name = "") {
   const simpleName = getSimpleCropName(name);
   return hindiCropNames[simpleName] || name;
 }
 
 function getShortLocation(location = "") {
-  // Example: "Lasalgaon, Nashik, Maharashtra"
-  return location.split(",")[1]?.trim() || location;
+  const parts = String(location).split(",");
+
+  // Example:
+  // "Lasalgaon, Nashik, Maharashtra"
+  // returns "Nashik"
+  return parts[1]?.trim() || parts[0]?.trim() || location;
 }
 
 function formatNumber(value) {
@@ -40,7 +46,13 @@ function formatNumber(value) {
 function formatDate(dateString) {
   if (!dateString) return "the latest available date";
 
-  return new Date(dateString).toLocaleDateString("en-IN", {
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "the latest available date";
+  }
+
+  return date.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -49,20 +61,20 @@ function formatDate(dateString) {
 
 function getCropDetails(crop) {
   return {
-    name: crop.name,
+    name: crop.name || "this crop",
     simpleName: getSimpleCropName(crop.name),
     hindiName: getHindiCropName(crop.name),
-    location: crop.location,
+    location: crop.location || "the local market",
     city: getShortLocation(crop.location),
-    fpo: crop.fpo,
-    available: crop.available,
-    unit: crop.unit,
-    mandiPrice: crop.mandiPricePerKg,
-    kisanPrice: crop.kisanPricePerKg,
-    farmerPrice: crop.farmerGetsPerKg,
-    farmerUplift: crop.farmerUpliftPct,
-    consumerSavings: crop.consumerSavingsPct,
-    tags: crop.tags || [],
+    fpo: crop.fpo || "the listed farmer organization",
+    available: crop.available ?? 0,
+    unit: crop.unit || "units",
+    mandiPrice: crop.mandiPricePerKg ?? 0,
+    kisanPrice: crop.kisanPricePerKg ?? 0,
+    farmerPrice: crop.farmerGetsPerKg ?? 0,
+    farmerUplift: crop.farmerUpliftPct ?? 0,
+    consumerSavings: crop.consumerSavingsPct ?? 0,
+    tags: Array.isArray(crop.tags) ? crop.tags : [],
     harvested: crop.harvested,
   };
 }
@@ -77,7 +89,9 @@ Here is today's agricultural market update.
 
 The update is for ${d.name}, available in ${d.location}.
 
-The available quantity is ${formatNumber(d.available)} ${d.unit.toLowerCase()}.
+The available quantity is ${formatNumber(d.available)} ${String(
+    d.unit
+  ).toLowerCase()}.
 
 The current mandi price is ${d.mandiPrice} rupees per kilogram.
 
@@ -91,18 +105,27 @@ Consumers can save approximately ${d.consumerSavings} percent through direct far
 
 This produce is supplied by ${d.fpo}.
 
-The available quality information includes ${d.tags.join(", ")}.
+The available quality information includes ${
+    d.tags.length > 0 ? d.tags.join(", ") : "standard quality information"
+  }.
 
 The produce was harvested on ${formatDate(d.harvested)}.
 
 KisanDirect connects farmers and buyers directly for better market opportunities.
 
 Thank you for using KisanDirect.
-  `.replace(/\s+/g, " ").trim();
+  `
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function createHindiAdvisory(crop) {
   const d = getCropDetails(crop);
+
+  const quantityUnit =
+    d.unit === "Quintals" || d.unit === "quintal"
+      ? "क्विंटल"
+      : d.unit;
 
   return `
 नमस्कार! किसान डायरेक्ट में आपका स्वागत है।
@@ -111,7 +134,9 @@ function createHindiAdvisory(crop) {
 
 यह अपडेट ${d.city} में उपलब्ध ${d.hindiName} के लिए है।
 
-इस उत्पाद की उपलब्ध मात्रा ${formatNumber(d.available)} ${d.unit === "Quintals" ? "क्विंटल" : d.unit} है।
+इस उत्पाद की उपलब्ध मात्रा ${formatNumber(
+    d.available
+  )} ${quantityUnit} है।
 
 मंडी कीमत ${d.mandiPrice} रुपये प्रति किलोग्राम है।
 
@@ -125,44 +150,73 @@ function createHindiAdvisory(crop) {
 
 यह उत्पाद ${d.fpo} द्वारा उपलब्ध कराया गया है।
 
-उत्पाद की गुणवत्ता संबंधी जानकारी: ${d.tags.join(", ")}।
+उत्पाद की गुणवत्ता संबंधी जानकारी: ${
+    d.tags.length > 0 ? d.tags.join(", ") : "मानक गुणवत्ता"
+  }।
 
 इस उत्पाद की कटाई ${formatDate(d.harvested)} को की गई थी।
 
 किसान डायरेक्ट किसानों और खरीदारों को सीधे जोड़कर बेहतर बाजार अवसर उपलब्ध कराता है।
 
 किसान डायरेक्ट का उपयोग करने के लिए धन्यवाद।
-  `.replace(/\s+/g, " ").trim();
+  `
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export default function KisanVani({ onClose }) {
   const [crops, setCrops] = useState([]);
   const [selectedCrop, setSelectedCrop] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [speaking, setSpeaking] = useState(false);
   const [activeLanguage, setActiveLanguage] = useState("");
 
+  /*
+   * Load crop data using the SAME API client used
+   * by the rest of the application.
+   *
+   * This means:
+   *
+   * VITE_API_URL
+   *       ↓
+   * https://kisandirect-backend.onrender.com/api
+   *       ↓
+   * api.getCrops()
+   *       ↓
+   * /crops
+   */
   useEffect(() => {
     async function loadCrops() {
       try {
         setLoading(true);
+        setError("");
 
-        const response = await fetch("/api/crops");
+        const data = await api.getCrops();
 
-        if (!response.ok) {
-          throw new Error("Unable to load crop data");
-        }
-
-        const data = await response.json();
-
-        // Supports either a direct array or { crops: [...] }
-        const cropList = Array.isArray(data) ? data : data.crops || [];
+        // Supports:
+        // 1. Direct array: [...]
+        // 2. Object: { crops: [...] }
+        const cropList = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.crops)
+          ? data.crops
+          : [];
 
         setCrops(cropList);
+
+        if (cropList.length === 0) {
+          setError("No crop information is currently available.");
+        }
       } catch (err) {
-        setError("Unable to load crop information. Please try again.");
+        console.error("Kisan Vani API error:", err);
+
+        setError(
+          "Unable to load crop information. Please try again."
+        );
       } finally {
         setLoading(false);
       }
@@ -170,19 +224,43 @@ export default function KisanVani({ onClose }) {
 
     loadCrops();
 
+    // Stop speech when the component is closed/unmounted.
     return () => {
-      window.speechSynthesis.cancel();
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, []);
 
+  /*
+   * Get unique crop names.
+   */
   const cropOptions = useMemo(() => {
-    return [...new Set(crops.map((crop) => getSimpleCropName(crop.name)))];
+    return [
+      ...new Set(
+        crops
+          .map((crop) => getSimpleCropName(crop.name))
+          .filter(Boolean)
+      ),
+    ];
   }, [crops]);
 
+  /*
+   * Get unique locations.
+   */
   const locationOptions = useMemo(() => {
-    return [...new Set(crops.map((crop) => getShortLocation(crop.location)))];
+    return [
+      ...new Set(
+        crops
+          .map((crop) => getShortLocation(crop.location))
+          .filter(Boolean)
+      ),
+    ];
   }, [crops]);
 
+  /*
+   * Filter crops according to selected crop/location.
+   */
   const filteredCrops = useMemo(() => {
     return crops.filter((crop) => {
       const cropMatches =
@@ -198,10 +276,21 @@ export default function KisanVani({ onClose }) {
     });
   }, [crops, selectedCrop, selectedLocation]);
 
+  /*
+   * Get the crop that should be used for the voice advisory.
+   *
+   * If the user selected a crop/location, the first matching
+   * crop is used.
+   *
+   * If nothing is selected, the first available crop is used.
+   */
   function getSelectedCrop() {
-    return filteredCrops[0];
+    return filteredCrops[0] || null;
   }
 
+  /*
+   * Speak Hindi or English advisory.
+   */
   function speakAdvisory(language) {
     const crop = getSelectedCrop();
 
@@ -210,11 +299,14 @@ export default function KisanVani({ onClose }) {
       return;
     }
 
-    if (!window.speechSynthesis) {
-      setError("Speech synthesis is not supported in this browser.");
+    if (!("speechSynthesis" in window)) {
+      setError(
+        "Speech synthesis is not supported in this browser."
+      );
       return;
     }
 
+    // Stop any previous speech.
     window.speechSynthesis.cancel();
 
     const text =
@@ -224,7 +316,9 @@ export default function KisanVani({ onClose }) {
 
     const utterance = new SpeechSynthesisUtterance(text);
 
-    utterance.lang = language === "hi" ? "hi-IN" : "en-IN";
+    utterance.lang =
+      language === "hi" ? "hi-IN" : "en-IN";
+
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.volume = 1;
@@ -240,21 +334,35 @@ export default function KisanVani({ onClose }) {
       setActiveLanguage("");
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (event) => {
+      console.error("Speech synthesis error:", event);
+
       setSpeaking(false);
       setActiveLanguage("");
-      setError("Unable to play the advisory. Please try again.");
+
+      setError(
+        "Unable to play the advisory. Please try again."
+      );
     };
 
     window.speechSynthesis.speak(utterance);
   }
 
+  /*
+   * Stop current speech.
+   */
   function stopAdvisory() {
-    window.speechSynthesis.cancel();
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
     setSpeaking(false);
     setActiveLanguage("");
   }
 
+  /*
+   * Close modal and stop audio.
+   */
   function handleClose() {
     stopAdvisory();
     onClose?.();
@@ -262,68 +370,124 @@ export default function KisanVani({ onClose }) {
 
   return (
     <div className="kv-overlay" onClick={handleClose}>
-      <div className="kv-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="kv-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* HEADER */}
         <div className="kv-header">
           <div className="kv-title">
             <span className="kv-mic">🎙️</span>
-            <span>Kisan Vani – Multilingual AI Voice Copilot</span>
+
+            <span>
+              Kisan Vani – Multilingual AI Voice Copilot
+            </span>
           </div>
 
-          <button className="kv-close" onClick={handleClose}>
+          <button
+            className="kv-close"
+            onClick={handleClose}
+            aria-label="Close Kisan Vani"
+          >
             ×
           </button>
         </div>
 
+        {/* BODY */}
         <div className="kv-body">
-          <div className={`kv-speaker ${speaking ? "is-speaking" : ""}`}>
+          <div
+            className={`kv-speaker ${
+              speaking ? "is-speaking" : ""
+            }`}
+          >
             🔊
           </div>
 
           <h2>Today's Agricultural Market Update</h2>
 
           <p className="kv-subtitle">
-            Hear detailed crop prices, availability, farmer benefits,
-            and market information from KisanDirect.
+            Hear detailed crop prices, availability, farmer
+            benefits, and market information from KisanDirect.
           </p>
 
-          {loading && <p className="kv-status">Loading crop information...</p>}
+          {/* LOADING */}
+          {loading && (
+            <p className="kv-status">
+              Loading crop information...
+            </p>
+          )}
 
-          {error && <p className="kv-error">{error}</p>}
+          {/* ERROR */}
+          {error && (
+            <p className="kv-error">
+              {error}
+            </p>
+          )}
 
+          {/* MAIN CONTENT */}
           {!loading && !error && (
             <>
+              {/* FILTERS */}
               <div className="kv-input-grid">
                 <div className="kv-field">
-                  <label>Crop</label>
+                  <label htmlFor="kv-crop">
+                    Crop
+                  </label>
+
                   <select
+                    id="kv-crop"
                     value={selectedCrop}
-                    onChange={(e) => setSelectedCrop(e.target.value)}
+                    onChange={(e) =>
+                      setSelectedCrop(e.target.value)
+                    }
                   >
-                    <option value="">All Crops</option>
+                    <option value="">
+                      All Crops
+                    </option>
+
                     {cropOptions.map((crop) => (
-                      <option key={crop} value={crop}>
-                        {crop.charAt(0).toUpperCase() + crop.slice(1)}
+                      <option
+                        key={crop}
+                        value={crop}
+                      >
+                        {crop.charAt(0).toUpperCase() +
+                          crop.slice(1)}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="kv-field">
-                  <label>Location</label>
+                  <label htmlFor="kv-location">
+                    Location
+                  </label>
+
                   <select
+                    id="kv-location"
                     value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
+                    onChange={(e) =>
+                      setSelectedLocation(e.target.value)
+                    }
                   >
-                    <option value="">All Locations</option>
-                    {locationOptions.map((location) => (
-                      <option key={location} value={location}>
-                        {location}
-                      </option>
-                    ))}
+                    <option value="">
+                      All Locations
+                    </option>
+
+                    {locationOptions.map(
+                      (location) => (
+                        <option
+                          key={location}
+                          value={location}
+                        >
+                          {location}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
               </div>
 
+              {/* PREVIEW / HINT */}
               {selectedCrop || selectedLocation ? (
                 filteredCrops.length > 0 ? (
                   <div className="kv-preview">
@@ -332,6 +496,7 @@ export default function KisanVani({ onClose }) {
                         ? filteredCrops[0].name
                         : `${filteredCrops.length} matching crops`}
                     </strong>
+
                     <span>
                       {filteredCrops.length === 1
                         ? `${filteredCrops[0].location} • ₹${filteredCrops[0].kisanPricePerKg}/kg`
@@ -340,57 +505,88 @@ export default function KisanVani({ onClose }) {
                   </div>
                 ) : (
                   <div className="kv-no-match">
-                    No matching crop found. Try another crop or location.
+                    No matching crop found. Try another
+                    crop or location.
                   </div>
                 )
               ) : (
                 <div className="kv-hint">
-                  Select a crop or location to hear its detailed update.
+                  Select a crop or location to hear its
+                  detailed update.
                 </div>
               )}
 
+              {/* AUDIO BUTTONS */}
               <div className="kv-actions">
                 <button
                   className="kv-play-btn"
-                  onClick={() => speakAdvisory("hi")}
-                  disabled={filteredCrops.length === 0}
+                  onClick={() =>
+                    speakAdvisory("hi")
+                  }
+                  disabled={
+                    filteredCrops.length === 0 ||
+                    speaking
+                  }
                 >
                   🔊
+
                   <span>
-                    {speaking && activeLanguage === "hi"
+                    {speaking &&
+                    activeLanguage === "hi"
                       ? "Playing Hindi Advisory..."
                       : "Play Hindi Advisory"}
                   </span>
-                  <small>हिंदी में आज का अपडेट सुनें</small>
+
+                  <small>
+                    हिंदी में आज का अपडेट सुनें
+                  </small>
                 </button>
 
                 <button
                   className="kv-play-btn kv-english-btn"
-                  onClick={() => speakAdvisory("en")}
-                  disabled={filteredCrops.length === 0}
+                  onClick={() =>
+                    speakAdvisory("en")
+                  }
+                  disabled={
+                    filteredCrops.length === 0 ||
+                    speaking
+                  }
                 >
                   🔊
+
                   <span>
-                    {speaking && activeLanguage === "en"
+                    {speaking &&
+                    activeLanguage === "en"
                       ? "Playing English Advisory..."
                       : "Play English Advisory"}
                   </span>
-                  <small>Hear today's KisanDirect update</small>
+
+                  <small>
+                    Hear today's KisanDirect update
+                  </small>
                 </button>
               </div>
 
+              {/* STOP BUTTON */}
               {speaking && (
-                <button className="kv-stop-btn" onClick={stopAdvisory}>
+                <button
+                  className="kv-stop-btn"
+                  onClick={stopAdvisory}
+                >
                   ⏹ Stop Audio
                 </button>
               )}
             </>
           )}
 
+          {/* ACCESSIBILITY NOTE */}
           <div className="kv-note">
-            <strong>Accessibility for Smallholders:</strong> Kisan Vani
-            uses the device's native Speech Synthesis engine to read
-            agricultural market updates aloud.
+            <strong>
+              Accessibility for Smallholders:
+            </strong>{" "}
+            Kisan Vani uses the device's native Speech
+            Synthesis engine to read agricultural market
+            updates aloud.
           </div>
         </div>
       </div>
